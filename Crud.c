@@ -247,7 +247,7 @@ void editarArquivo(char nomeArquivo[])
         }
         else
         {
-            // Se não for o registro a ser editado, copiar a linha original
+            // Se não for o registro a ser editado, copiar a linha original.
             fputs(linha, temp);
             fputc('\n', temp);
         }
