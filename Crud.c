@@ -39,7 +39,7 @@ void limparBufferEntrada()
         ;
 }
 
-void excluirArquivo(char nomeArquivo[])
+void excluirRegistro(char nomeArquivo[])
 {
     FILE *input = fopen(nomeArquivo, "r");
     FILE *temp = fopen("temp.txt", "w");
@@ -51,11 +51,7 @@ void excluirArquivo(char nomeArquivo[])
     char linha[1000];
     size_t tamanhoLinha;
 
-    while (fgets(linha, sizeof(linha), input) != NULL)
-    {
-        tamanhoLinha = strlen(linha);
-        printf("%.*s", (int)(tamanhoLinha - 1), linha);
-    }
+    lerArquivo(nomeArquivo);
 
     fseek(input, 0, SEEK_SET); // Retorna ao início do arquivo para a leitura subsequente
 
@@ -147,18 +143,14 @@ void lerArquivo(char nomeArquivo[])
 
 void editarArquivo(char nomeArquivo[])
 {
+    struct Cliente cliente;
     FILE *input = fopen(nomeArquivo, "r");
     FILE *temp = fopen("temp.txt", "w");
     char dataKey[15];
 
-    printf("Registros salvos:\n");
-
-    char linha[1000];
-    size_t tamanhoLinha;
-
-    lerArquivo(nomeArquivo);
 
     fseek(input, 0, SEEK_SET);
+    excluirRegistro(nomeArquivo);
 
     printf("\nDigite a data do registro que deseja editar incluindo / :\n");
     fgets(dataKey, sizeof(dataKey), stdin);
@@ -167,77 +159,47 @@ void editarArquivo(char nomeArquivo[])
 
     fseek(input, 0, SEEK_SET);
 
-    printf("\nRegistros após a edição:\n");
+    printf("\nRegistros antes da alteração:\n");
 
     // Flag para indicar se o registro foi encontrado
     int registroEncontrado = 0;
 
-    while (fgets(linha, sizeof(linha), input) != NULL)
+    while (fscanf(input, "%s\n%s\n%s\n%s\n%f\n%f\n%s\n%f",
+                  cliente.data, cliente.nome, cliente.telefone, cliente.email,
+                  &cliente.peso, &cliente.altura, cliente.cpf,
+                  &cliente.imc) == 8)
     {
-        linha[strcspn(linha, "\n")] = '\0';
-        converterMinusculas(linha, sizeof(linha));
-
-        if (strncmp(linha, dataKey, strlen(dataKey)) == 0)
+        if (strcmp(cliente.data, dataKey) == 0)
         {
             // Encontrou o registro a ser editado
-            struct Cliente cliente;
-            sscanf(linha, "%s %s %s %s %f %f %s %f",
-                   cliente.data, cliente.nome, cliente.telefone, cliente.email,
-                   &cliente.peso, &cliente.altura, cliente.cpf,
-                   &cliente.imc);
 
-            // Solicitar ao usuário qual campo editar
-            int opcao;
-            printf("\nEscolha um campo para editar:\n");
-            printf("1. Nome\n");
-            printf("2. Telefone\n");
-            printf("3. Email\n");
-            printf("4. Peso\n");
-            printf("5. Altura\n");
-            printf("6. CPF\n");
+            // Solicitar ao usuário os novos valores para todos os campos
+            printf("Digite o novo nome: ");
+            fgets(cliente.nome, sizeof(cliente.nome), stdin);
+            cliente.nome[strcspn(cliente.nome, "\n")] = '\0';
 
-            scanf("%d", &opcao);
+            printf("Digite o novo telefone: ");
+            fgets(cliente.telefone, sizeof(cliente.telefone), stdin);
+            cliente.telefone[strcspn(cliente.telefone, "\n")] = '\0';
+
+            printf("Digite um novo email: ");
+            fgets(cliente.email, sizeof(cliente.email), stdin);
+            cliente.email[strcspn(cliente.email, "\n")] = '\0';
+
+            printf("Digite um novo peso: ");
+            scanf("%f", &cliente.peso);
             limparBufferEntrada();
 
-            switch (opcao)
-            {
-            case 1:
-                printf("Digite o novo nome: ");
-                fgets(cliente.nome, sizeof(cliente.nome), stdin);
-                cliente.nome[strcspn(cliente.nome, "\n")] = '\0';
-                break;
-            case 2:
-                printf("Digite o novo telefone: ");
-                fgets(cliente.telefone, sizeof(cliente.telefone), stdin);
-                cliente.telefone[strcspn(cliente.telefone, "\n")] = '\0';
-                break;
-            case 3:
-                printf("Digite um novo email: ");
-                fgets(cliente.email, sizeof(cliente.email), stdin);
-                cliente.email[strcspn(cliente.email, "\n")] = '\0';
-                break;
-            case 4:
-                printf("Digite um novo peso: ");
-                scanf("%f", &cliente.peso);
-                limparBufferEntrada();
-                break;
-            case 5:
-                printf("Digite uma nova altura: ");
-                scanf("%f", &cliente.altura);
-                limparBufferEntrada();
-                break;
-            case 6:
-                printf("Digite um novo CPF: ");
-                fgets(cliente.cpf, sizeof(cliente.cpf), stdin);
-                cliente.cpf[strcspn(cliente.cpf, "\n")] = '\0';
-                break;
-            default:
-                printf("Opção inválida\n");
-                break;
-            }
+            printf("Digite uma nova altura: ");
+            scanf("%f", &cliente.altura);
+            limparBufferEntrada();
+
+            printf("Digite um novo CPF: ");
+            fgets(cliente.cpf, sizeof(cliente.cpf), stdin);
+            cliente.cpf[strcspn(cliente.cpf, "\n")] = '\0';
 
             // Atualizar a linha no arquivo temporário
-            fprintf(temp, "%s %s %s %s %.2f %.2f %s %.2f\n",
+            fprintf(temp, "%s\n%s\n%s\n%s\n%f\n%f\n%s\n%f\n",
                     cliente.data, cliente.nome, cliente.telefone, cliente.email,
                     cliente.peso, cliente.altura, cliente.cpf,
                     cliente.imc);
@@ -248,8 +210,10 @@ void editarArquivo(char nomeArquivo[])
         else
         {
             // Se não for o registro a ser editado, copiar a linha original.
-            fputs(linha, temp);
-            fputc('\n', temp);
+            fprintf(temp, "%s\n%s\n%s\n%s\n%f\n%f\n%s\n%f\n",
+                    cliente.data, cliente.nome, cliente.telefone, cliente.email,
+                    cliente.peso, cliente.altura, cliente.cpf,
+                    cliente.imc);
         }
     }
 
@@ -271,6 +235,7 @@ void editarArquivo(char nomeArquivo[])
         printf("Registro não encontrado.\n");
     }
 }
+
 
 void inserir(struct Cliente cliente, char nomeArquivo[], char cpf[])
 {
@@ -341,7 +306,7 @@ int main()
             // Lógica para consulta
             break;
         case 3:
-            excluirArquivo(nomeArquivo);
+            excluirRegistro(nomeArquivo);
             printf("Registro excluído com sucesso!\n");
             break;
         case 4:
