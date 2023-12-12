@@ -4,6 +4,7 @@
 #include <time.h>
 #include <ctype.h>
 
+
 struct Cliente
 {
     char nome[100];
@@ -16,7 +17,7 @@ struct Cliente
     char data[11]; // Formato DD/MM/AAAA
 };
 
-// Função para obter a data atual
+// Fun�?o para obter a data atual
 void obterDataAtual(char *data)
 {
     time_t t = time(NULL);
@@ -38,81 +39,6 @@ void limparBufferEntrada()
     while ((c = getchar()) != '\n' && c != EOF)
         ;
 }
-
-void excluirRegistro(char nomeArquivo[])
-{
-    FILE *input = fopen(nomeArquivo, "r");
-    FILE *temp = fopen("temp.txt", "w");
-    char dataKey[15];
-
-    printf("Registros salvos:\n");
-
-    // Lendo e exibindo todos os registros antes da exclusão
-    char linha[1000];
-    size_t tamanhoLinha;
-
-    lerArquivo(nomeArquivo);
-
-    fseek(input, 0, SEEK_SET); // Retorna ao início do arquivo para a leitura subsequente
-
-    printf("\nDigite a data do registro que deseja excluir incluindo / :\n");
-    fgets(dataKey, sizeof(dataKey), stdin);
-    dataKey[strcspn(dataKey, "\n")] = '\0';        // Remover o caractere de nova linha
-    converterMinusculas(dataKey, sizeof(dataKey)); // Converter para minúsculas
-
-    fseek(input, 0, SEEK_SET); // Garante que o cursor do arquivo esteja no início
-
-    printf("\nRegistros após a exclusão:\n");
-
-    // Ler e escrever registros, excluindo aqueles que correspondem à dataKey e as próximas 7 linhas
-    int linhasParaExcluir = 0;
-
-    while (fgets(linha, sizeof(linha), input) != NULL)
-    {
-        linha[strcspn(linha, "\n")] = '\0';        // Remover o caractere de nova linha
-        converterMinusculas(linha, sizeof(linha)); // Converter para minúsculas
-
-        if (linhasParaExcluir > 0)
-        {
-            // Ignora a linha se linhasParaExcluir for maior que zero
-            linhasParaExcluir--;
-            continue;
-        }
-
-        if (strncmp(linha, dataKey, strlen(dataKey)) == 0)
-        {
-            // Inicia a exclusão da linha atual e das próximas 7 linhas
-            linhasParaExcluir = 7;
-        }
-        else
-        {
-            // Se a linha não deve ser excluída, copia para o arquivo temporário
-            fputs(linha, temp);
-            fputc('\n', temp); // Adiciona uma quebra de linha após cada linha copiada
-        }
-    }
-
-    fclose(input);
-    fclose(temp);
-
-    // Remover o arquivo original
-    remove(nomeArquivo);
-    // Renomear o arquivo temporário para o nome do arquivo original
-    rename("temp.txt", nomeArquivo);
-}
-
-// Função para criar um novo arquivo com as informações do cliente
-void criarArquivo(struct Cliente cliente, char nomeArquivo[])
-{
-    FILE *arquivo;
-
-    arquivo = fopen(nomeArquivo, "w");
-
-    fprintf(arquivo, "%s\n%s\n%s\n%s\n%f\n%f\n%s\n%f", cliente.data, cliente.nome, cliente.telefone, cliente.email, cliente.peso, cliente.altura, cliente.cpf, cliente.imc);
-    fclose(arquivo);
-}
-
-// Função para ler as informações do cliente de um arquivo
 void lerArquivo(char nomeArquivo[])
 {
     struct Cliente cliente;
@@ -132,7 +58,7 @@ void lerArquivo(char nomeArquivo[])
                   &cliente.imc) == 8)
     {
 
-        printf("Data : %s\nNome: %s\nTelefone: %s\nEmail: %s\nPeso: %.2f\nAltura: %.2f\nCPF: %s\nIMC: %.2f\n\n",
+        printf("Data : %s\nNome: %s\nTelefone: %s\nEmail: %s\nPeso: %.2f\nAltura: %.2f\nCPF: %s\nIMC: %.2f\n",
                cliente.data, cliente.nome, cliente.telefone, cliente.email,
                cliente.peso, cliente.altura, cliente.cpf,
                cliente.imc);
@@ -140,6 +66,77 @@ void lerArquivo(char nomeArquivo[])
 
     fclose(arquivo);
 }
+
+void excluirRegistro(char nomeArquivo[], char dataKey[])
+{
+    FILE *input = fopen(nomeArquivo, "r");
+    FILE *temp = fopen("temp.txt", "w");
+    
+
+    printf("Registros salvos:\n");
+
+    // Lendo e exibindo todos os registros antes da exclus?o
+    char linha[1000];
+
+
+    lerArquivo(nomeArquivo);
+
+    fseek(input, 0, SEEK_SET); // Retorna ao in?cio do arquivo para a leitura subsequente
+
+    dataKey[strcspn(dataKey, "\n")] = '\0';        // Remover o caractere de nova linha
+    converterMinusculas(dataKey, sizeof(dataKey)); // Converter para min?sculas
+
+    fseek(input, 0, SEEK_SET); // Garante que o cursor do arquivo esteja no in?cio
+
+    int linhasParaExcluir = 0;
+
+    while (fgets(linha, sizeof(linha), input) != NULL)
+    {
+        linha[strcspn(linha, "\n")] = '\0';        // Remover o caractere de nova linha
+        converterMinusculas(linha, sizeof(linha)); // Converter para min?sculas
+
+        if (linhasParaExcluir > 0)
+        {
+            // Ignora a linha se linhasParaExcluir for maior que zero
+            linhasParaExcluir--;
+            continue;
+        }
+
+        if (strncmp(linha, dataKey, strlen(dataKey)) == 0)
+        {
+            // Inicia a exclus?o da linha atual e das pr?ximas 7 linhas
+            linhasParaExcluir = 7;
+        }
+        else
+        {
+            // Se a linha n?o deve ser exclu?da, copia para o arquivo tempor?rio
+            fputs(linha, temp);
+            fputc('\n', temp); // Adiciona uma quebra de linha ap?s cada linha copiada
+        }
+    }
+
+    fclose(input);
+    fclose(temp);
+
+    // Remover o arquivo original
+    remove(nomeArquivo);
+    // Renomear o arquivo tempor?rio para o nome do arquivo original
+    rename("temp.txt", nomeArquivo);
+}
+
+// Fun�?o para criar um novo arquivo com as informa�?es do cliente
+void criarArquivo(struct Cliente cliente, char nomeArquivo[])
+{
+    FILE *arquivo;
+
+    arquivo = fopen(nomeArquivo, "w");
+
+    fprintf(arquivo, "%s\n%s\n%s\n%s\n%f\n%f\n%s\n%f", cliente.data, cliente.nome, cliente.telefone, cliente.email, cliente.peso, cliente.altura, cliente.cpf, cliente.imc);
+    fclose(arquivo);
+}
+
+// Fun�?o para ler as informa�?es do cliente de um arquivo
+
 
 void editarArquivo(char nomeArquivo[])
 {
@@ -150,7 +147,7 @@ void editarArquivo(char nomeArquivo[])
 
 
     fseek(input, 0, SEEK_SET);
-    excluirRegistro(nomeArquivo);
+    excluirRegistro(nomeArquivo, dataKey);
 
     printf("\nDigite a data do registro que deseja editar incluindo / :\n");
     fgets(dataKey, sizeof(dataKey), stdin);
@@ -159,7 +156,7 @@ void editarArquivo(char nomeArquivo[])
 
     fseek(input, 0, SEEK_SET);
 
-    printf("\nRegistros antes da alteração:\n");
+    printf("\nRegistros antes da altera�?o:\n");
 
     // Flag para indicar se o registro foi encontrado
     int registroEncontrado = 0;
@@ -173,7 +170,7 @@ void editarArquivo(char nomeArquivo[])
         {
             // Encontrou o registro a ser editado
 
-            // Solicitar ao usuário os novos valores para todos os campos
+            // Solicitar ao usu?rio os novos valores para todos os campos
             printf("Digite o novo nome: ");
             fgets(cliente.nome, sizeof(cliente.nome), stdin);
             cliente.nome[strcspn(cliente.nome, "\n")] = '\0';
@@ -198,7 +195,7 @@ void editarArquivo(char nomeArquivo[])
             fgets(cliente.cpf, sizeof(cliente.cpf), stdin);
             cliente.cpf[strcspn(cliente.cpf, "\n")] = '\0';
 
-            // Atualizar a linha no arquivo temporário
+            // Atualizar a linha no arquivo tempor?rio
             fprintf(temp, "%s\n%s\n%s\n%s\n%f\n%f\n%s\n%f\n",
                     cliente.data, cliente.nome, cliente.telefone, cliente.email,
                     cliente.peso, cliente.altura, cliente.cpf,
@@ -209,7 +206,7 @@ void editarArquivo(char nomeArquivo[])
         }
         else
         {
-            // Se não for o registro a ser editado, copiar a linha original.
+            // Se n?o for o registro a ser editado, copiar a linha original.
             fprintf(temp, "%s\n%s\n%s\n%s\n%f\n%f\n%s\n%f\n",
                     cliente.data, cliente.nome, cliente.telefone, cliente.email,
                     cliente.peso, cliente.altura, cliente.cpf,
@@ -224,15 +221,15 @@ void editarArquivo(char nomeArquivo[])
     if (registroEncontrado)
     {
         remove(nomeArquivo);
-        // Renomear o arquivo temporário para o nome do arquivo original
+        // Renomear o arquivo tempor?rio para o nome do arquivo original
         rename("temp.txt", nomeArquivo);
         printf("Registro editado com sucesso!\n");
     }
     else
     {
-        // Remover o arquivo temporário se o registro não foi encontrado
+        // Remover o arquivo tempor?rio se o registro n?o foi encontrado
         remove("temp.txt");
-        printf("Registro não encontrado.\n");
+        printf("Registro n?o encontrado.\n");
     }
 }
 
@@ -255,14 +252,14 @@ void inserir(struct Cliente cliente, char nomeArquivo[], char cpf[])
     printf("Digite a altura do cliente: ");
     scanf("%f", &cliente.altura);
     cliente.imc = cliente.peso / (cliente.altura * cliente.altura);
-    
-    
+
+
 
     FILE *arquivo;
 
     arquivo = fopen(nomeArquivo, "a");
 
-    fprintf(arquivo, "%s\n%s\n%s\n%s\n%f\n%f\n%s\n%f\n", cliente.data, cliente.nome, cliente.telefone, cliente.email, cliente.peso, cliente.altura, cpf, cliente.imc);
+    fprintf(arquivo, "\n%s\n%s\n%s\n%s\n%f\n%f\n%s\n%f", cliente.data, cliente.nome, cliente.telefone, cliente.email, cliente.peso, cliente.altura, cpf, cliente.imc);
     fclose(arquivo);
 }
 
@@ -272,6 +269,7 @@ int main()
     printf("Digite o CPF do cliente: ");
     fgets(cpf, sizeof(cpf), stdin);
     cpf[strcspn(cpf, "\n")] = '\0';
+    char dataKey[15];
 
     struct Cliente cliente;
 
@@ -280,46 +278,60 @@ int main()
     strcat(nomeArquivo, ".txt");
 
     FILE *arquivo = fopen(nomeArquivo, "r");
+    int opcao;
 
     if (arquivo != NULL)
     {
         fclose(arquivo);
         printf("Cliente encontrado!\n");
 
-        int opcao;
-        printf("Escolha uma opção:\n");
-        printf("1. Inserção\n");
+        do {
+
+        printf("\nEscolha uma op�?o:\n");
+        printf("1. Inser�?o\n");
         printf("2. Consulta\n");
-        printf("3. Exclusão\n");
-        printf("4. Edição\n");
+        printf("3. Exclus?o\n");
+        printf("4. Edi�?o\n");
+        printf("5. Sair\n\n");
         scanf("%d", &opcao);
         limparBufferEntrada();
 
         switch (opcao)
         {
         case 1:
-        inserir(cliente, nomeArquivo, cpf);
-            // Lógica para inserção
+            system("cls");
+            inserir(cliente, nomeArquivo, cpf);
+
             break;
         case 2:
+            system("cls");
             lerArquivo(nomeArquivo);
-            // Lógica para consulta
+
             break;
         case 3:
-            excluirRegistro(nomeArquivo);
-            printf("Registro excluído com sucesso!\n");
+            system("cls");
+            printf("Digite uma das datas a seguir:");
+            lerArquivo(nomeArquivo);
+            excluirRegistro(nomeArquivo, dataKey);
+            printf("Registro exclu?do com sucesso!\n");
             break;
         case 4:
+            system("cls");
             editarArquivo(nomeArquivo);
             printf("Registro editado com sucesso!\n");
             break;
+        case 5:
+            printf("Saindo ...\n");
+            break;
         default:
-            printf("Opção inválida\n");
+            printf("Op�?o inv?lida\n");
         }
+        } while (opcao != 5);
     }
+
     else
     {
-        printf("Cliente não encontrado. Criando novo cliente...\n");
+        printf("Cliente n?o encontrado. Criando novo cliente...\n");
 
         obterDataAtual(cliente.data);
 
