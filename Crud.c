@@ -58,7 +58,7 @@ void lerArquivo(char nomeArquivo[])
                   &cliente.imc) == 8)
     {
 
-        printf("Data : %s\nNome: %s\nTelefone: %s\nEmail: %s\nPeso: %.2f\nAltura: %.2f\nCPF: %s\nIMC: %.2f\n",
+        printf("\nData : %s\nNome: %s\nTelefone: %s\nEmail: %s\nPeso: %.2f\nAltura: %.2f\nCPF: %s\nIMC: %.2f\n",
                cliente.data, cliente.nome, cliente.telefone, cliente.email,
                cliente.peso, cliente.altura, cliente.cpf,
                cliente.imc);
@@ -73,13 +73,12 @@ void excluirRegistro(char nomeArquivo[], char dataKey[])
     FILE *temp = fopen("temp.txt", "w");
     
 
-    printf("Registros salvos:\n");
 
     // Lendo e exibindo todos os registros antes da exclus?o
     char linha[1000];
 
 
-    lerArquivo(nomeArquivo);
+
 
     fseek(input, 0, SEEK_SET); // Retorna ao in?cio do arquivo para a leitura subsequente
 
@@ -138,25 +137,21 @@ void criarArquivo(struct Cliente cliente, char nomeArquivo[])
 // Funç?o para ler as informaç?es do cliente de um arquivo
 
 
-void editarArquivo(char nomeArquivo[])
+void editarArquivo(char nomeArquivo[], char dataKey[])
 {
     struct Cliente cliente;
     FILE *input = fopen(nomeArquivo, "r");
     FILE *temp = fopen("temp.txt", "w");
-    char dataKey[15];
 
 
     fseek(input, 0, SEEK_SET);
     excluirRegistro(nomeArquivo, dataKey);
 
-    printf("\nDigite a data do registro que deseja editar incluindo / :\n");
-    fgets(dataKey, sizeof(dataKey), stdin);
+    
     dataKey[strcspn(dataKey, "\n")] = '\0';
     converterMinusculas(dataKey, sizeof(dataKey));
 
     fseek(input, 0, SEEK_SET);
-
-    printf("\nRegistros antes da alteraç?o:\n");
 
     // Flag para indicar se o registro foi encontrado
     int registroEncontrado = 0;
@@ -223,7 +218,6 @@ void editarArquivo(char nomeArquivo[])
         remove(nomeArquivo);
         // Renomear o arquivo tempor?rio para o nome do arquivo original
         rename("temp.txt", nomeArquivo);
-        printf("Registro editado com sucesso!\n");
     }
     else
     {
@@ -263,9 +257,14 @@ void inserir(struct Cliente cliente, char nomeArquivo[], char cpf[])
     fclose(arquivo);
 }
 
+
 int main()
 {
+
+    int change = 0;
+    
     char cpf[15];
+    inicio:
     printf("Digite o CPF do cliente: ");
     fgets(cpf, sizeof(cpf), stdin);
     cpf[strcspn(cpf, "\n")] = '\0';
@@ -310,14 +309,20 @@ int main()
             break;
         case 3:
             system("cls");
-            printf("Digite uma das datas a seguir:");
+            printf("Digite uma das datas a seguir:\n");
             lerArquivo(nomeArquivo);
+            printf("\n");
+            fgets(dataKey, sizeof(dataKey), stdin);
             excluirRegistro(nomeArquivo, dataKey);
             printf("Registro exclu?do com sucesso!\n");
             break;
         case 4:
             system("cls");
-            editarArquivo(nomeArquivo);
+            printf("Digite uma das datas a seguir para alterar\n");
+            lerArquivo(nomeArquivo);
+            printf("\n");
+            fgets(dataKey, sizeof(dataKey), stdin);
+            editarArquivo(nomeArquivo, dataKey);
             printf("Registro editado com sucesso!\n");
             break;
         case 5:
@@ -355,6 +360,18 @@ int main()
 
         criarArquivo(cliente, nomeArquivo);
         printf("Novo cliente criado com sucesso!\n");
+        limparBufferEntrada();
+    }
+    printf("Agora digite 1 para voltar e entrar no menu ou 2 para fechar o programa :\n");
+    scanf("%d", &change);
+    if (change == 1)
+    {
+        limparBufferEntrada();
+        goto inicio;
+    }
+    else if (change == 0)
+    {
+        exit(0);
     }
 
     return 0;
