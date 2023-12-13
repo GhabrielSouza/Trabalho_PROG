@@ -362,14 +362,14 @@ int main()
         printf("Novo cliente criado com sucesso!\n");
         limparBufferEntrada();
     }
-    printf("Agora digite 1 para voltar e entrar no menu ou 2 para fechar o programa :\n");
+    printf("\nAgora digite 1 para voltar e entrar no menu ou 2 para fechar o programa :\n");
     scanf("%d", &change);
     if (change == 1)
     {
         limparBufferEntrada();
         goto inicio;
     }
-    else if (change == 0)
+    else if (change == 2)
     {
         exit(0);
     }
